@@ -143,7 +143,7 @@ class ForecastScheduler:
             forecast_config = json.loads(scheduled_forecast.forecast_config)
             
             # Import and execute forecast generation
-            from main import generate_forecast_internal
+            from yash_ai_ml_dp_service.old_main import generate_forecast_internal
             
             # Execute the forecast
             result = generate_forecast_internal(forecast_config, db)

@@ -11,5 +11,7 @@
 # python setup_database.py
 
 # Start the application
-echo "Starting the application..."
-uvicorn main:app --host 0.0.0.0 --port 8000
+#!/bin/bash
+cd "$(dirname "$0")"
+echo "Starting Forecasting API..."
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

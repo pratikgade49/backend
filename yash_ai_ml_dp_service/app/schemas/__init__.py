@@ -2,28 +2,15 @@
 Pydantic schemas for request/response validation
 """
 
-from app.schemas.user import UserCreate, UserLogin, UserResponse, AdminSetActiveRequest
-from app.schemas.auth import Token
-from app.schemas.forecast import (
-    ForecastConfig,
-    DataPoint,
-    AlgorithmResult,
-    ForecastResult,
-    MultiForecastResult,
-    SavedForecastRequest,
-    SavedForecastResponse,
-    BestFitRecommendationRequest,
-    BestFitRecommendationResponse
-)
-from app.schemas.configuration import SaveConfigRequest, ConfigurationResponse
-from app.schemas.external_factor import FredDataRequest, FredDataResponse
-from app.schemas.scheduler import (
-    ScheduledForecastCreate,
-    ScheduledForecastUpdate,
-    ScheduledForecastResponse,
-    ForecastExecutionResponse
-)
-from app.schemas.stats import DatabaseStats, DataViewRequest, DataViewResponse
+from app.schemas.auth import *
+from app.schemas.user import *
+from app.schemas.forecast import *
+from app.schemas.configuration import *
+from app.schemas.external_factor import *
+from app.schemas.scheduler import *
+from app.schemas.stats import *
+from app.schemas.saved_forecast import *
+
 
 __all__ = [
     "UserCreate", "UserLogin", "UserResponse", "AdminSetActiveRequest",
