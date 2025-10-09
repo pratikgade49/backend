@@ -3,14 +3,14 @@
 User schemas for request/response validation
 """
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
 class UserCreate(BaseModel):
     """Schema for user registration"""
     username: str
-    email: EmailStr
+    email: str
     password: str
     full_name: Optional[str] = None
 

@@ -76,14 +76,14 @@ class DimensionService:
     @staticmethod
     def get_or_create_product(db: Session, product_name: str) -> int:
         """Get or create product and return ID"""
-        return DimensionManager.get_or_create_dimension(db, 'product', product_name)
+        return DimensionManager.get_or_create_dimension_cached(db, 'product', product_name)
 
     @staticmethod
     def get_or_create_customer(db: Session, customer_name: str) -> int:
         """Get or create customer and return ID"""
-        return DimensionManager.get_or_create_dimension(db, 'customer', customer_name)
+        return DimensionManager.get_or_create_dimension_cached(db, 'customer', customer_name)
 
     @staticmethod
     def get_or_create_location(db: Session, location_name: str) -> int:
         """Get or create location and return ID"""
-        return DimensionManager.get_or_create_dimension(db, 'location', location_name)
+        return DimensionManager.get_or_create_dimension_cached(db, 'location', location_name)

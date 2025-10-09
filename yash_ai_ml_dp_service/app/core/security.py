@@ -6,19 +6,13 @@ Security utilities for password hashing and JWT tokens
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from app.core.config import settings
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password: str) -> str:
-    """Hash a password"""
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+from typing import Optional
+from app.core.database import get_db
+from app.utils.hash_utils import hash_password, verify_password
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT access token"""
@@ -42,3 +36,80 @@ def verify_token(token: str) -> Optional[str]:
         return username
     except JWTError:
         return None
+
+# Add this at module level
+security = HTTPBearer()
+
+# Add these functions at the end of the file
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    """Get current authenticated user"""
+    from app.models.user import User
+
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    username = verify_token(credentials.credentials)
+    if username is None:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:
+        raise credentials_exception
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+
+    if not user.is_approved and not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not approved by admin"
+        )
+    
+    return user
+
+def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+):
+    """Get current user if authenticated, otherwise return None"""
+    from app.models.user import User
+
+    if not credentials:
+        return None
+
+    try:
+        username = verify_token(credentials.credentials)
+        if username is None:
+            return None
+
+        user = db.query(User).filter(User.username == username).first()
+        if user is None or not user.is_active:
+            return None
+        
+        if not user.is_approved and not user.is_admin:
+            return None
+        
+        return user
+    except:
+        return None
+
+def require_admin(current_user = Depends(get_current_user)):
+    """Require admin privileges"""
+    from app.models.user import User
+
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    return current_user

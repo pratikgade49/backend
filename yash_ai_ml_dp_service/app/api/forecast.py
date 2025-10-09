@@ -10,7 +10,7 @@ import hashlib
 import json
 
 from app.core.database import get_db
-from app.core.security import get_current_user, get_current_user_optional
+from app.core.security import get_current_user, require_admin
 from app.schemas.forecast import (
     ForecastConfig,
     ForecastResult,

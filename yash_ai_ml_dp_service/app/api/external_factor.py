@@ -12,12 +12,14 @@ import io
 from datetime import datetime
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_admin
 from app.core.config import settings
 from app.models.user import User
 from app.models.external_factor import ExternalFactorData
 from app.schemas.external_factor import FredDataRequest, FredDataResponse
 from app.services.external_factor_service import ExternalFactorService
+from app.utils.validation import DateRangeValidator
+
 
 router = APIRouter(tags=["External Factors"])
 
@@ -27,7 +29,7 @@ async def get_external_factors(
     current_user: User = Depends(get_current_user)
 ):
     """Get unique external factor names from database"""
-    factors = ExternalFactorService.get_unique_factors(db)
+    factors = ExternalFactorService.get_available_factors(db)
     return {"external_factors": factors}
 
 @router.post("/fetch_fred_data", response_model=FredDataResponse)
@@ -120,3 +122,12 @@ async def upload_external_factors(
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+
+
+@router.post("/validate_factors")
+def validate_external_factors(
+    factor_names: List[str],
+    db: Session = Depends(get_db)
+):
+    """Validate external factors against main data"""
+    return DateRangeValidator.validate_external_factors(db, factor_names)

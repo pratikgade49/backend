@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_admin
 from app.models.user import User
 from app.models.model_persistence import SavedModel, ModelAccuracyHistory
 from app.services.model_persistence_service import ModelPersistenceManager

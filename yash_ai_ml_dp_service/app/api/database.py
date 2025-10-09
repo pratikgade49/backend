@@ -9,7 +9,7 @@ from sqlalchemy import func
 from typing import List, Dict, Any, Optional
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_admin
 from app.models.user import User
 from app.models.forecast import ForecastData
 from app.models.dimension import ProductDimension, CustomerDimension, LocationDimension
@@ -36,16 +36,16 @@ async def get_database_stats(
     ).first()
     
     return DatabaseStats(
-        total_records=total_records or 0,
-        total_products=total_products or 0,
-        total_customers=total_customers or 0,
-        total_locations=total_locations or 0,
-        total_users=total_users or 0,
-        date_range={
-            "start": str(date_range.min_date) if date_range.min_date else None,
-            "end": str(date_range.max_date) if date_range.max_date else None
+        totalRecords=total_records or 0,
+        uniqueProducts=total_products or 0,
+        uniqueCustomers=total_customers or 0,
+        uniqueLocations=total_locations or 0,
+        totalUsers=total_users or 0,
+        dateRange={
+            "start": str(date_range.min_date) if date_range.min_date else "",
+            "end": str(date_range.max_date) if date_range.max_date else ""
         },
-        total_saved_forecasts=0  # Add this when saved_forecasts model is ready
+        totalSavedForecasts=0  # Add this when saved_forecasts model is ready
     )
 
 @router.get("/options")
@@ -54,14 +54,14 @@ async def get_database_options(
     current_user: User = Depends(get_current_user)
 ):
     """Get all available filter options"""
-    products = db.query(ProductDimension.name).distinct().all()
-    customers = db.query(CustomerDimension.name).distinct().all()
-    locations = db.query(LocationDimension.name).distinct().all()
-    
+    products = db.query(ProductDimension.product_name).distinct().all()
+    customers = db.query(CustomerDimension.customer_name).distinct().all()
+    locations = db.query(LocationDimension.location_name).distinct().all()
+
     return {
-        "products": [p.name for p in products],
-        "customers": [c.name for c in customers],
-        "locations": [l.name for l in locations]
+        "products": [p.product_name for p in products],
+        "customers": [c.customer_name for c in customers],
+        "locations": [l.location_name for l in locations]
     }
 
 @router.post("/filtered_options")
@@ -76,21 +76,21 @@ async def get_filtered_options(
     # Apply filters
     if filters.get('product'):
         product = db.query(ProductDimension).filter(
-            ProductDimension.name == filters['product']
+            ProductDimension.product_name == filters['product']
         ).first()
         if product:
             query = query.filter(ForecastData.product_id == product.id)
-    
+
     if filters.get('customer'):
         customer = db.query(CustomerDimension).filter(
-            CustomerDimension.name == filters['customer']
+            CustomerDimension.customer_name == filters['customer']
         ).first()
         if customer:
             query = query.filter(ForecastData.customer_id == customer.id)
-    
+
     if filters.get('location'):
         location = db.query(LocationDimension).filter(
-            LocationDimension.name == filters['location']
+            LocationDimension.location_name == filters['location']
         ).first()
         if location:
             query = query.filter(ForecastData.location_id == location.id)
@@ -104,15 +104,15 @@ async def get_filtered_options(
         if record.product_id:
             product = db.query(ProductDimension).get(record.product_id)
             if product:
-                available_products.add(product.name)
+                available_products.add(product.product_name)
         if record.customer_id:
             customer = db.query(CustomerDimension).get(record.customer_id)
             if customer:
-                available_customers.add(customer.name)
+                available_customers.add(customer.customer_name)
         if record.location_id:
             location = db.query(LocationDimension).get(record.location_id)
             if location:
-                available_locations.add(location.name)
+                available_locations.add(location.location_name)
     
     return {
         "products": sorted(list(available_products)),
@@ -128,59 +128,61 @@ async def view_data(
 ):
     """View filtered data from database"""
     query = db.query(ForecastData)
-    
+
     # Apply filters
     if request.product:
         product = db.query(ProductDimension).filter(
-            ProductDimension.name == request.product
+            ProductDimension.product_name == request.product
         ).first()
         if product:
             query = query.filter(ForecastData.product_id == product.id)
-    
+
     if request.customer:
         customer = db.query(CustomerDimension).filter(
-            CustomerDimension.name == request.customer
+            CustomerDimension.customer_name == request.customer
         ).first()
         if customer:
             query = query.filter(ForecastData.customer_id == customer.id)
-    
+
     if request.location:
         location = db.query(LocationDimension).filter(
-            LocationDimension.name == request.location
+            LocationDimension.location_name == request.location
         ).first()
         if location:
             query = query.filter(ForecastData.location_id == location.id)
-    
+
     if request.start_date:
         query = query.filter(ForecastData.date >= request.start_date)
-    
+
     if request.end_date:
         query = query.filter(ForecastData.date <= request.end_date)
-    
-    total_count = query.count()
-    
-    # Apply limit
-    records = query.order_by(ForecastData.date.desc()).limit(request.limit).all()
-    
+
+    total_records = query.count()
+    total_pages = (total_records + request.page_size - 1) // request.page_size
+    offset = (request.page - 1) * request.page_size
+
+    # Apply pagination
+    records = query.order_by(ForecastData.date.desc()).offset(offset).limit(request.page_size).all()
+
     # Format data
     data = []
     for record in records:
         product_name = None
         customer_name = None
         location_name = None
-        
+
         if record.product_id:
             product = db.query(ProductDimension).get(record.product_id)
-            product_name = product.name if product else None
-        
+            product_name = product.product_name if product else None
+
         if record.customer_id:
             customer = db.query(CustomerDimension).get(record.customer_id)
-            customer_name = customer.name if customer else None
-        
+            customer_name = customer.customer_name if customer else None
+
         if record.location_id:
             location = db.query(LocationDimension).get(record.location_id)
-            location_name = location.name if location else None
-        
+            location_name = location.location_name if location else None
+
         data.append({
             "id": record.id,
             "date": str(record.date),
@@ -189,9 +191,11 @@ async def view_data(
             "customer": customer_name,
             "location": location_name
         })
-    
+
     return DataViewResponse(
         data=data,
-        total_count=total_count,
-        filtered_count=len(data)
+        total_records=total_records,
+        page=request.page,
+        page_size=request.page_size,
+        total_pages=total_pages
     )

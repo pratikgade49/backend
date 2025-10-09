@@ -40,3 +40,18 @@ def paginated_response(
             "total_pages": (total + page_size - 1) // page_size
         }
     }
+
+def create_forecast_response(
+    forecast_data: Any,
+    config: Dict[str, Any],
+    metadata: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Build a forecast response"""
+    response = {
+        "success": True,
+        "data": forecast_data,
+        "config": config
+    }
+    if metadata:
+        response["metadata"] = metadata
+    return response

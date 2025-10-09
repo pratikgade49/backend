@@ -73,3 +73,8 @@ def fill_missing_dates(df: pd.DataFrame, date_col: str = 'date') -> pd.DataFrame
     df = df.fillna(method='ffill').fillna(method='bfill')
     
     return df.reset_index()
+
+def process_uploaded_data(data, **kwargs):
+    """Process uploaded data"""
+    # Placeholder function
+    return data

@@ -8,14 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import warnings
 
 from app.core.config import settings
-from app.core.database import init_database, engine
-from app.api import auth, users, data, forecast
+from app.core.database import init_database, engine, SessionLocal
+from app.api import auth, users, data, forecast, upload
 # Import remaining routers once created:
-from app.api import configuration, saved_forecasts, external_factors
+from app.api import configuration, saved_forecast, external_factor
 from app.api import model_cache, scheduler, database as db_router, downloads, root
 
-from app.models.model_persistence import SavedModel, ModelAccuracyHistory
-from app.services.scheduler_service import start_scheduler, stop_scheduler
+from app.models import SavedModel, ModelAccuracyHistory
+from app.core.scheduler_background import start_scheduler, stop_scheduler
 
 warnings.filterwarnings('ignore')
 
@@ -42,6 +42,20 @@ async def startup_event():
             print("✅ Model persistence tables initialized!")
         except Exception as e:
             print(f"⚠️  Model persistence table creation failed: {e}")
+
+        # Create default admin user if none exists
+        from app.services.user_service import UserService
+        db = SessionLocal()
+        try:
+            admin_user = UserService.create_default_admin_user(db)
+            if admin_user:
+                print("✅ Default admin user created: username='admin', password='admin123'")
+            else:
+                print("ℹ️  Admin user already exists")
+        except Exception as e:
+            print(f"⚠️  Error creating default admin user: {e}")
+        finally:
+            db.close()
     else:
         print("⚠️  Database initialization failed")
     
@@ -60,20 +74,17 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(data.router)
 app.include_router(forecast.router)
+app.include_router(upload.router)
 # Add these as you create them:
 app.include_router(configuration.router)
-app.include_router(saved_forecasts.router)
-app.include_router(external_factors.router)
+app.include_router(saved_forecast.router)
+app.include_router(external_factor.router)
 app.include_router(model_cache.router)
 app.include_router(scheduler.router)
 app.include_router(db_router.router)
 app.include_router(downloads.router)
 app.include_router(root.router)
 
-# Health Check (temporary - move to root.py later)
-@app.get("/")
-async def health_check():
-    return {
-        "message": f"{settings.APP_TITLE} is running",
-        "version": settings.APP_VERSION
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -140,3 +140,41 @@ def get_latest_execution(
     return db.query(ForecastExecution).filter(
         ForecastExecution.scheduled_forecast_id == schedule_id
     ).order_by(ForecastExecution.execution_time.desc()).first()
+
+def get_user_scheduled_forecasts(db: Session, user_id: int) -> List[ScheduledForecast]:
+    """Get scheduled forecasts for a specific user"""
+    return db.query(ScheduledForecast).filter(
+        ScheduledForecast.user_id == user_id
+    ).order_by(ScheduledForecast.created_at.desc()).all()
+
+def get_forecast_executions(db: Session, schedule_id: Optional[int] = None) -> List[ForecastExecution]:
+    """Get forecast executions, optionally filtered by schedule_id"""
+    query = db.query(ForecastExecution)
+    if schedule_id:
+        query = query.filter(ForecastExecution.scheduled_forecast_id == schedule_id)
+    return query.order_by(ForecastExecution.execution_time.desc()).all()
+
+def update_execution_status(
+    db: Session,
+    execution_id: int,
+    status: str,
+    duration_seconds: Optional[int] = None,
+    result_summary: Optional[str] = None,
+    error_message: Optional[str] = None,
+    forecast_data: Optional[str] = None
+) -> Optional[ForecastExecution]:
+    """Update execution status and details"""
+    execution = db.query(ForecastExecution).filter(ForecastExecution.id == execution_id).first()
+    if execution:
+        execution.status = status
+        if duration_seconds is not None:
+            execution.duration_seconds = duration_seconds
+        if result_summary is not None:
+            execution.result_summary = result_summary
+        if error_message is not None:
+            execution.error_message = error_message
+        if forecast_data is not None:
+            execution.forecast_data = forecast_data
+        db.commit()
+        db.refresh(execution)
+    return execution

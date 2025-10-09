@@ -8,14 +8,14 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_admin
 from app.models.user import User
 from app.schemas.configuration import SaveConfigRequest, ConfigurationResponse
 from app.services.configuration_service import ConfigurationService
 
 router = APIRouter(prefix="/configurations", tags=["Configurations"])
 
-@router.get("/", response_model=List[ConfigurationResponse])
+@router.get("", response_model=List[ConfigurationResponse])
 async def get_configurations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -26,13 +26,15 @@ async def get_configurations(
         ConfigurationResponse(
             id=config.id,
             name=config.name,
+            description=config.description,
             config=config.config,
-            created_at=config.created_at.isoformat()
+            created_at=config.created_at.isoformat(),
+            updated_at=config.updated_at.isoformat()
         )
         for config in configs
     ]
 
-@router.post("/", response_model=ConfigurationResponse)
+@router.post("", response_model=ConfigurationResponse)
 async def save_configuration(
     request: SaveConfigRequest,
     db: Session = Depends(get_db),
@@ -45,7 +47,7 @@ async def save_configuration(
         name=request.name,
         config=request.config
     )
-    
+
     return ConfigurationResponse(
         id=config.id,
         name=config.name,

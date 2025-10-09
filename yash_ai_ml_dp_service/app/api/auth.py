@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_user, get_current_user_optional
-from app.schemas.auth import UserLogin, Token
+from app.schemas import UserLogin, Token
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
@@ -64,9 +64,18 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
             detail="User account is pending approval"
         )
     
-    access_token = AuthService.create_access_token(user.id)
-    
-    return Token(access_token=access_token, token_type="bearer")
+    access_token = AuthService.create_access_token(user)
+
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        user={
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "is_admin": user.is_admin
+        }
+    )
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):

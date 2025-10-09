@@ -13,20 +13,23 @@ class DataViewRequest(BaseModel):
     location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
-    limit: int = 100
+    page: int = 1
+    page_size: int = 50
 
 class DataViewResponse(BaseModel):
     """Schema for data view response"""
     data: List[Dict[str, Any]]
-    total_count: int
-    filtered_count: int
+    total_records: int
+    page: int
+    page_size: int
+    total_pages: int
 
 class DatabaseStats(BaseModel):
     """Schema for database statistics"""
-    total_records: int
-    total_products: int
-    total_customers: int
-    total_locations: int
-    date_range: Dict[str, str]
-    total_users: int
-    total_saved_forecasts: int
+    totalRecords: int
+    uniqueProducts: int
+    uniqueCustomers: int
+    uniqueLocations: int
+    dateRange: Dict[str, str]
+    totalUsers: int
+    totalSavedForecasts: int

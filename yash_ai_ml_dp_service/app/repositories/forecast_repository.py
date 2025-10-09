@@ -7,7 +7,8 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 from datetime import datetime, date
-from app.models.forecast import ForecastData, SavedForecastResult, ForecastConfiguration
+from app.models.forecast import ForecastData, ForecastConfiguration
+from app.models.saved_forecast import SavedForecastResult
 import json
 
 def save_forecast_data_batch(db: Session, forecast_records: List[ForecastData]) -> int:

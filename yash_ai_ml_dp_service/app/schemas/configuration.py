@@ -15,8 +15,10 @@ class ConfigurationResponse(BaseModel):
     """Schema for configuration response"""
     id: int
     name: str
+    description: Optional[str]
     config: dict
     created_at: str
+    updated_at: str
 
     class Config:
         from_attributes = True

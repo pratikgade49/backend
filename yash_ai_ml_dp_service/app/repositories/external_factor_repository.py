@@ -87,3 +87,49 @@ def delete_external_factor_by_name(db: Session, factor_name: str) -> int:
 def get_external_factor_count(db: Session) -> int:
     """Get total external factor data count"""
     return db.query(ExternalFactorData).count()
+
+def get_all_external_factors(db: Session) -> List[ExternalFactorData]:
+    """Get all external factor data"""
+    return db.query(ExternalFactorData).order_by(
+        ExternalFactorData.factor_name, ExternalFactorData.date
+    ).all()
+
+def get_external_factor_by_name(db: Session, factor_name: str) -> List[ExternalFactorData]:
+    """Get external factor data by name"""
+    return db.query(ExternalFactorData).filter(
+        ExternalFactorData.factor_name == factor_name
+    ).order_by(ExternalFactorData.date).all()
+
+def create_external_factor(
+    db: Session,
+    factor_name: str,
+    date: date,
+    factor_value: float
+) -> ExternalFactorData:
+    """Create a new external factor record"""
+    factor = ExternalFactorData(
+        factor_name=factor_name,
+        date=date,
+        factor_value=factor_value
+    )
+    db.add(factor)
+    db.commit()
+    db.refresh(factor)
+    return factor
+
+def get_external_factors_for_date_range(
+    db: Session,
+    start_date: date,
+    end_date: date,
+    factor_name: Optional[str] = None
+) -> List[ExternalFactorData]:
+    """Get external factors within a date range"""
+    query = db.query(ExternalFactorData).filter(
+        ExternalFactorData.date >= start_date,
+        ExternalFactorData.date <= end_date
+    )
+    
+    if factor_name:
+        query = query.filter(ExternalFactorData.factor_name == factor_name)
+    
+    return query.order_by(ExternalFactorData.date).all()

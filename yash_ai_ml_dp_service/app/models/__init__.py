@@ -1,14 +1,6 @@
 """
 Database models
 """
-from app.models.user import User
-from app.models.forecast import ForecastData
-from app.models.dimension import ProductDimension, CustomerDimension, LocationDimension
-from app.models.external_factor import ExternalFactorData
-from app.models.model_persistence import SavedModel, ModelAccuracyHistory
-from app.models.saved_forecast import SavedForecastResult  # ADD THIS
-from app.models.scheduler import ScheduledForecast, ForecastExecution
-from app.models.roles import ForecastConfiguration  # If this exists
 from app.core.database import Base
 from app.models.user import User
 from app.models.roles import UserRole
@@ -23,9 +15,9 @@ from app.models.dimension import (
 )
 from app.models.forecast import (
     ForecastData,
-    SavedForecastResult,
     ForecastConfiguration
 )
+from app.models.saved_forecast import SavedForecastResult
 from app.models.external_factor import ExternalFactorData
 from app.models.scheduler import (
     ScheduledForecast,

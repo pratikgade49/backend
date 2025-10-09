@@ -6,7 +6,7 @@ User model
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from app.core.database import Base
-from app.core.security import hash_password, verify_password
+from app.utils.hash_utils import hash_password, verify_password
 
 class User(Base):
     """User model for authentication and authorization"""
