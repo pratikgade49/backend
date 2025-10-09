@@ -131,3 +131,17 @@ def validate_external_factors(
 ):
     """Validate external factors against main data"""
     return DateRangeValidator.validate_external_factors(db, factor_names)
+
+@router.post("/fetch_fred_data")
+async def fetch_fred_data_root(
+    request: FredDataRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Root-level fetch FRED data endpoint"""
+    return await fetch_fred_data(request, db, current_user)
+
+@router.get("/fred_series_info")
+async def get_fred_series_info_root():
+    """Root-level FRED series info endpoint"""
+    return await get_fred_series_info()
