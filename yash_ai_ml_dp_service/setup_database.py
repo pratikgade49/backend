@@ -5,7 +5,7 @@ Assumes the database already exists and only creates tables
 """
 
 import os
-from database import init_database
+from app.core.database import init_database
 
 def setup_tables():
     """Setup database tables (assumes database already exists)"""
