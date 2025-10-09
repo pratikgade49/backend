@@ -8,14 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import warnings
 
 from app.core.config import settings
-from app.core.database import init_database, engine, SessionLocal
-from app.api import auth, users, data, forecast, upload
+from app.core.database import init_database, engine
+from app.api import auth, users, data, forecast
 # Import remaining routers once created:
-from app.api import configuration, saved_forecast, external_factor
+from app.api import configuration, saved_forecasts, external_factors
 from app.api import model_cache, scheduler, database as db_router, downloads, root
 
-from app.models import SavedModel, ModelAccuracyHistory
-from app.core.scheduler_background import start_scheduler, stop_scheduler
+from app.models.model_persistence import SavedModel, ModelAccuracyHistory
+from app.services.scheduler_service import start_scheduler, stop_scheduler
 
 warnings.filterwarnings('ignore')
 
@@ -71,6 +71,7 @@ async def shutdown_event():
 
 # Register Routers
 app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(users.router)
 app.include_router(data.router)
 app.include_router(forecast.router)
