@@ -274,3 +274,33 @@ async def best_fit_recommendation_alias(
             recommended_algorithm="linear_regression",
             reason=f"Error during recommendation: {str(e)}"
         )
+
+@router.post("/best-fit", response_model=BestFitRecommendationResponse)
+async def get_best_fit_recommendation(
+    request: BestFitRecommendationRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get best fit algorithm recommendation based on cached model performance"""
+    from app.services.model_persistence_service import ModelPersistenceService
+    
+    config = request.config
+    config_dict = config.dict()
+    config_hash = hashlib.md5(
+        json.dumps(config_dict, sort_keys=True).encode()
+    ).hexdigest()
+    
+    best_model = ModelPersistenceService.get_best_model_for_config(db, config_hash)
+    
+    if best_model:
+        return BestFitRecommendationResponse(
+            recommended_algorithm=best_model.algorithm,
+            confidence=best_model.accuracy,
+            last_accuracy=best_model.accuracy,
+            last_run_date=best_model.created_at.isoformat(),
+            message=f"Based on previous runs, {best_model.algorithm} achieved {best_model.accuracy:.2%} accuracy"
+        )
+    
+    return BestFitRecommendationResponse(
+        message="No previous model cache found for this configuration. Try running a forecast first."
+    )
