@@ -244,8 +244,8 @@ async def compare_algorithms(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison error: {str(e)}")
 
-@router.post("/best-fit", response_model=BestFitRecommendationResponse)
-async def recommend_best_fit(
+@router.post("/best_fit_recommendation", response_model=BestFitRecommendationResponse)
+async def best_fit_recommendation_alias(
     request: BestFitRecommendationRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
