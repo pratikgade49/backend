@@ -45,6 +45,8 @@ async def startup_event():
             print(f"⚠️  Model persistence table creation failed: {e}")
 
         # Create default admin user if none exists
+        from app.core.database import SessionLocal
+
         from app.services.user_service import UserService
         db = SessionLocal()
         try:
@@ -71,12 +73,20 @@ async def shutdown_event():
     print("🛑 Forecast scheduler stopped")
 
 # Register Routers
+app.include_router(root.router)  # Root must be first for "/" endpoint
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(users.router)
+app.include_router(upload.router)
 app.include_router(data.router)
 app.include_router(forecast.router)
-app.include_router(upload.router)
+app.include_router(configuration.router)
+app.include_router(saved_forecast.router)
+app.include_router(external_factor.router)
+app.include_router(model_cache.router)
+app.include_router(scheduler.router)
+app.include_router(db_router.router)
+app.include_router(downloads.router)
 # Add these as you create them:
 app.include_router(configuration.router)
 app.include_router(saved_forecast.router)
