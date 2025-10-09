@@ -17,7 +17,7 @@ from app.models.forecast import ForecastData
 from app.services.dimension_service import DimensionService
 from app.utils.data_processing import process_uploaded_data
 
-router = APIRouter(prefix="/data", tags=["Data Management"])
+router = APIRouter(tags=["Data Management"])
 
 @router.post("/upload")
 async def upload_data(
