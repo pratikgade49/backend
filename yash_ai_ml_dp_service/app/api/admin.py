@@ -34,6 +34,7 @@ async def get_all_users(
         )
         for user in users
     ]
+  
 @router.post("/users/{user_id}/active", response_model=UserResponse)
 async def set_user_active(
     user_id: int,
