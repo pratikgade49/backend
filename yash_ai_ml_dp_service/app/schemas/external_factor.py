@@ -4,16 +4,18 @@ External factor schemas
 """
 
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 class FredDataRequest(BaseModel):
     """Schema for FRED data request"""
-    series_id: str
-    start_date: str
-    end_date: str
+    series_ids: List[str]
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 class FredDataResponse(BaseModel):
     """Schema for FRED data response"""
-    series_id: str
-    data: List[Dict[str, Any]]
-    count: int
+    message: str
+    inserted: int
+    duplicates: int
+    series_processed: int
+    series_details: List[Dict[str, Any]]

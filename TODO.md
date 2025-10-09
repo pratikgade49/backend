@@ -1,0 +1,2 @@
+- [ ] Update yash_ai_ml_dp_service/app/schemas/external_factor.py to change FredDataRequest to use series_ids (List[str]) and make dates Optional, and update FredDataResponse structure
+- [ ] Update yash_ai_ml_dp_service/app/api/external_factor.py to add necessary imports (requests, Optional from typing), replace the fetch_fred_data endpoint with the new code, and remove the duplicate root endpoint

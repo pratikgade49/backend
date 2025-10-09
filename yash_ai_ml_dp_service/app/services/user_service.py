@@ -44,12 +44,14 @@ class UserService:
         }
 
     @staticmethod
-    def approve_user(db: Session, user_id: int) -> dict:
+    def approve_user(db: Session, user_id: int) -> Optional[User]:
         """Approve a user"""
-        user = update_user_approval(db, user_id, True)
-        if user:
-            return {"success": True, "message": "User approved successfully", "user": user}
-        return {"success": False, "message": "User not found"}
+        return update_user_approval(db, user_id, True)
+
+    @staticmethod
+    def set_user_active(db: Session, user_id: int, is_active: bool) -> Optional[User]:
+        """Set user active status"""
+        return update_user_status(db, user_id, is_active)
 
     @staticmethod
     def deactivate_user(db: Session, user_id: int) -> dict:

@@ -1,2 +1,14 @@
 node_modules/
 .env
+__pycache__/
+*.log
+.DS_Store
+.vscode/
+yash_ai_ml_dp_service/app/__pycache__
+yash_ai_ml_dp_service/.pytest_cache
+yash_ai_ml_dp_service/app/api/__pycache__
+yash_ai_ml_dp_service/app/core/__pycache__
+yash_ai_ml_dp_service/app/models/__pycache__
+yash_ai_ml_dp_service/app/services/__pycache__
+yash_ai_ml_dp_service/app/utils/__pycache__
+yash_ai_ml_dp_service/app/workers/__pycache__

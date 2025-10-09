@@ -16,7 +16,7 @@ from app.api import (
 )
 
 from app.models.model_persistence import SavedModel, ModelAccuracyHistory
-from app.services.scheduler_service import start_scheduler, stop_scheduler
+from app.core.scheduler_background import start_scheduler, stop_scheduler
 
 warnings.filterwarnings('ignore')
 
