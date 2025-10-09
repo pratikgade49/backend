@@ -34,6 +34,5 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class AdminSetActiveRequest(BaseModel):
-    """Schema for admin to set user active status"""
-    user_id: int
+    """Request to set user active status"""
     is_active: bool
