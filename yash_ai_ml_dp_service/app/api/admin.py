@@ -34,6 +34,29 @@ async def get_all_users(
         )
         for user in users
     ]
+@router.post("/users/{user_id}/active", response_model=UserResponse)
+async def set_user_active(
+    user_id: int,
+    request: AdminSetActiveRequest,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_admin)
+):
+    """Set user active status (admin only)"""
+    user = UserService.set_user_active(db, user_id, request.is_active)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return UserResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_approved=user.is_approved,
+        is_admin=user.is_admin,
+        created_at=user.created_at
+    )
+
 
 @router.patch("/users/{user_id}/approve")
 async def approve_user(
